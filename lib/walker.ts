@@ -1,5 +1,5 @@
 import { join } from "path";
-import { readdirSync } from "fs";
+import { readdirSync, copyFileSync } from "fs";
 import { getShapeFromPath, ShapeDontExistError } from './shapeUtil';
 
 const SOLID_PODS_RELATIVE_PATHS = "http/localhost_3000/pods";
@@ -8,10 +8,10 @@ export async function walkSolidPods(solid_bench_start_fragments_folder: string) 
     const path = getPodRootPath(solid_bench_start_fragments_folder);
     const pods_files = readdirSync(path);
     const explore_pods_promises = [];
-    for (const dir_entry of pods_files) {
+    for (const pod_path of pods_files) {
         explore_pods_promises.push(
             new Promise(() => {
-                explorePod(join(path, dir_entry));
+                explorePod(join(path, pod_path));
             })
         );
     }
@@ -20,12 +20,24 @@ export async function walkSolidPods(solid_bench_start_fragments_folder: string) 
 
 function explorePod(pod_path: string) {
     const pod_contents = readdirSync(pod_path);
-    for (const dir_entry of pod_contents) {
-        const shape_path = getShapeFromPath(join(pod_path, dir_entry));
-        if (!(shape_path instanceof ShapeDontExistError)) {
-            console.log(`the shape path is ${shape_path} for the dir ${dir_entry}`)
+    const error_array: ShapeDontExistError[] = [];
+    const file_generation_promises = [];
+    for (const pod_content_path of pod_contents) {
+        const shape_path = getShapeFromPath(join(pod_path, pod_content_path));
+        if (shape_path instanceof ShapeDontExistError) {
+            error_array.push(shape_path);
+        } else {
+            file_generation_promises.push(new Promise(() => {
+                generateShape(shape_path, pod_path)
+            }));
         }
     }
+
+    Promise.all(file_generation_promises);
+}
+
+function generateShape(shape_path: string, pod_path: string) {
+    copyFileSync(shape_path, pod_path);
 }
 
 function getPodRootPath(solid_bench_start_fragments_folder: string) {
