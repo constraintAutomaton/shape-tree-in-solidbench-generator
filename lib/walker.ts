@@ -1,11 +1,12 @@
 import { join } from "path";
 import { readdirSync, copyFileSync } from "fs";
 import { getShapeFromPath, ShapeDontExistError } from './shapeUtil';
+import { Config } from './parameters';
 
 const SOLID_PODS_RELATIVE_PATHS = "http/localhost_3000/pods";
 
-export async function walkSolidPods(solid_bench_start_fragments_folder: string) {
-    const path = getPodRootPath(solid_bench_start_fragments_folder);
+export async function walkSolidPods(config: Config) {
+    const path = getPodRootPath(config.solid_bench_start_fragments_folder);
     const pods_files = readdirSync(path);
     const explore_pods_promises = [];
     for (const pod_path of pods_files) {
@@ -18,7 +19,7 @@ export async function walkSolidPods(solid_bench_start_fragments_folder: string) 
     await Promise.all(explore_pods_promises);
 }
 
-function explorePod(pod_path: string) {
+export function explorePod(pod_path: string) {
     const pod_contents = readdirSync(pod_path);
     const error_array: ShapeDontExistError[] = [];
     const file_generation_promises = [];
@@ -32,7 +33,6 @@ function explorePod(pod_path: string) {
             }));
         }
     }
-
     Promise.all(file_generation_promises);
 }
 
