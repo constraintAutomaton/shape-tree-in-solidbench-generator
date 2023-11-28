@@ -3,6 +3,7 @@
   "module": "index.ts",
   "type": "module",
   "devDependencies": {
+    "@types/uuid": "^9.0.7",
     "bun-types": "latest",
     "jest": "^29.7.0"
   },
@@ -11,7 +12,10 @@
   },
   "dependencies": {
     "@rdfjs/types": "^1.1.0",
+    "@types/n3": "^1.16.4",
+    "n3": "^1.17.2",
     "rdf-data-factory": "^1.1.2",
-    "rdf-js": "^4.0.2"
+    "rdf-js": "^4.0.2",
+    "uuid": "^9.0.1"
   }
 }

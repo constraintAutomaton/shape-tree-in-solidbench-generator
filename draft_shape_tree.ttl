@@ -1,0 +1,13 @@
+@prefix st: <http://www.w3.org/ns/shapetrees#> .
+@prefix solid: <http://www.w3.org/ns/solid/terms#>.
+
+
+<#container> a st:ShapeTree;
+    st:expectsType st:Container;
+    st:contains <#post> .
+
+<#post> a st:ShapeTree;
+    st:expectsType st:Resource;
+    st:shape <THE SHAPE>;
+    solid:instance <PATH OF THE FILE> .
+

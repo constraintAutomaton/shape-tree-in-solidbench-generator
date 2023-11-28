@@ -1,17 +1,12 @@
 import { parse, join } from "path";
-/**
-import { Term } from "@rdfjs/types";
-import { DataFactory } from 'rdf-data-factory';
-import type * as RDF from 'rdf-js';
-const DF = new DataFactory<RDF.BaseQuad>();
-*/
+import { lstatSync } from "fs";
 
 const SHAPE_PATH = "./shapes";
 const SHAPE_EXTENSION = "shexc";
 
 const POST_SHAPE_PATH = join(SHAPE_PATH, `posts.${SHAPE_EXTENSION}`);
 
-const SHAPE_MAP: Map<string, string> = new Map([
+export const SHAPE_MAP: Map<string, string> = new Map([
     ['posts', POST_SHAPE_PATH],
 ]);
 
@@ -22,7 +17,7 @@ export function getShapeFromPath(path: string): string | ShapeDontExistError {
         return new ShapeDontExistError(`The shape derived from the file ${path_serialized.name} don't exist `)
     }
 
-    return shape_path;
+    return shape_path
 }
 
 export class ShapeDontExistError extends Error {

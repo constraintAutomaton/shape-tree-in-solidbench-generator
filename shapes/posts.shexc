@@ -1,9 +1,8 @@
-PREFIX ex: <http://ex.example/#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 PREFIX ldbcvoc: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary/>
 PREFIX schema: <http://www.w3.org/2000/01/rdf-schema#>
 
-ldbcvoc:Post {
+<#Post> {
     ldbcvoc:id xsd:long {1}
     ldbcvoc:imageFile xsd:string *
     ldbcvoc:locationIP xsd:string {1}
