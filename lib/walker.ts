@@ -1,59 +1,59 @@
 import { join, parse } from "path";
 import { readdirSync, copyFileSync, lstatSync, appendFileSync } from "fs";
-import { getShapeFromPath, ShapeDontExistError } from './shapeUtil';
-import { Config, } from './parameters';
-import { Term } from "@rdfjs/types";
-import { DataFactory } from 'rdf-data-factory';
-import type * as RDF from 'rdf-js';
-import { v4 as uuidv4 } from 'uuid';
-import { Writer } from "n3";
+import { getShapeFromPath } from './shapeUtil';
+import { generateShapeTrees } from './shapeTreesUtil'
+import { ShapeContentPath, Config, ShapeTreesCannotBeGenerated, ShapeDontExistError } from './util';
 
 
-const DF = new DataFactory<RDF.BaseQuad>();
-
-const RDF_TYPE_IRI = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
-const SHAPE_TREE_PREFIX_IRI = "http://www.w3.org/ns/shapetrees#";
-const SOLID_IRI = "http://www.w3.org/ns/solid/terms#";
-const SHAPE_TREE_FILE_NAME = "shapetree.ttl";
-
-// we might not want to assume that
-const SOLID_PODS_RELATIVE_PATHS = "http/localhost_3000/pods";
-
-export async function walkSolidPods(config: Config) {
-    const path = join(config.solid_bench_start_fragments_folder, SOLID_PODS_RELATIVE_PATHS);
-    const pods_files = readdirSync(path);
+export async function walkSolidPods(config: Config): Promise<Array<Array<Error>> | undefined> {
+    const pods_files = readdirSync(config.pod_folder);
+    const errors: Array<Array<Error>> = [];
     const explore_pods_promises = [];
     for (const pod_path of pods_files) {
         explore_pods_promises.push(
-            new Promise(() => {
-                addShapeDataInPod(
+            new Promise((resolve, reject) => {
+                const resp = addShapeDataInPod(
                     {
-                        pod_path: join(path, pod_path),
+                        pod_path: join(config.pod_folder, pod_path),
                         generate_shape: getShapeFromPath,
-                        generate_shape_tree: generateShapeTrees
+                        generate_shape_trees: generateShapeTrees
                     }
-
-
                 );
+
+                if (resp === undefined) {
+                    resolve(undefined)
+                }
+
+                reject(resp)
             })
         );
     }
-    await Promise.all(explore_pods_promises);
+    const results = await Promise.allSettled(explore_pods_promises);
+    results.forEach((result) => {
+        if (result.status === "rejected") {
+            errors.push(result.reason);
+        }
+    });
+    if (errors.length === 0) {
+        return undefined
+    }
+    return errors;
 }
 
 export function addShapeDataInPod(
     {
         pod_path,
         generate_shape,
-        generate_shape_tree }
+        generate_shape_trees: generate_shape_trees
+    }
         : {
             pod_path: string,
             generate_shape?: (path: string) => string | ShapeDontExistError,
-            generate_shape_tree?: (shapes: Array<ShapeContentPath>, pod_path: string) => undefined | Error
+            generate_shape_trees?: (shapes: Array<ShapeContentPath>, pod_path: string) => undefined | ShapeTreesCannotBeGenerated
         })
 
     : undefined | Array<Error> {
-    if (generate_shape === undefined && generate_shape_tree === undefined) {
+    if (generate_shape === undefined && generate_shape_trees === undefined) {
         return undefined;
     }
     const pod_contents = readdirSync(pod_path);
@@ -80,11 +80,13 @@ export function addShapeDataInPod(
 
     Promise.all(file_generation_promises);
 
-
-    if (generate_shape_tree !== undefined) {
-        const errors = generate_shape_tree(shapes_generated, pod_path);
-        if (errors !== undefined) {
-            return error_array.concat(errors);
+    if (generate_shape_trees !== undefined) {
+        const shape_trees_error = generate_shape_trees(shapes_generated, pod_path);
+        if (shape_trees_error !== undefined) {
+            error_array.push(shape_trees_error)
+            return error_array
+        } else if (error_array.length !== 0) {
+            return error_array
         }
     } else if (error_array.length !== 0) {
         return error_array
@@ -92,49 +94,4 @@ export function addShapeDataInPod(
 
 }
 
-function generateShapeTrees(shape_content: Array<ShapeContentPath>, pod_path: string): Error | undefined {
-    let success: Error | undefined = undefined;
-    const writer = new Writer();
-    for (const { shape, content } of shape_content) {
-        const quads = generateTreeAShapeTree(shape, content, writer);
-    }
-    writer.end((error, result) => {
-        if (error !== undefined) {
-            appendFileSync(join(pod_path, SHAPE_TREE_FILE_NAME), result);
-        }
-        success = error;
-    });
-    return success
-}
 
-function generateTreeAShapeTree(shape_path: string, content_path: string, writer: Writer) {
-    const label_tree = `${parse(content_path).name}_${uuidv4()}`
-    writer.addQuad(
-        DF.namedNode(label_tree),
-        DF.namedNode(RDF_TYPE_IRI),
-        DF.namedNode(`${SHAPE_TREE_PREFIX_IRI}ShapeTree`)
-    );
-
-    writer.addQuad(
-        DF.namedNode(label_tree),
-        DF.namedNode(`${SHAPE_TREE_PREFIX_IRI}expectsType`),
-        DF.namedNode(`${SHAPE_TREE_PREFIX_IRI}Resource`),
-    );
-
-    writer.addQuad(
-        DF.namedNode(label_tree),
-        DF.namedNode(`${SHAPE_TREE_PREFIX_IRI}shape`),
-        DF.namedNode(shape_path),
-    )
-
-    writer.addQuad(
-        DF.namedNode(label_tree),
-        DF.namedNode(`${SOLID_IRI}${lstatSync(content_path).isDirectory() ? "instanceContainer" : "instance"}`),
-        DF.namedNode(content_path)
-    );
-}
-
-export interface ShapeContentPath {
-    shape: string,
-    content: string
-}

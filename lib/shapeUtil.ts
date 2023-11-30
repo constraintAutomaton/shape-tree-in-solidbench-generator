@@ -1,5 +1,7 @@
 import { parse, join } from "path";
 import { lstatSync } from "fs";
+import { ShapeDontExistError } from "./util";
+
 
 const SHAPE_PATH = "./shapes";
 const SHAPE_EXTENSION = "shexc";
@@ -18,11 +20,4 @@ export function getShapeFromPath(path: string): string | ShapeDontExistError {
     }
 
     return shape_path
-}
-
-export class ShapeDontExistError extends Error {
-    constructor(message: string) {
-        super(message);
-        this.name = "ShapeDontExistError";
-    }
 }

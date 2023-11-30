@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { getShapeFromPath, ShapeDontExistError } from '../lib/shapeUtil';
+import { getShapeFromPath } from '../lib/shapeUtil';
+import { ShapeDontExistError } from '../lib/util';
 import { parse } from "path";
 
 
