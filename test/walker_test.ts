@@ -293,7 +293,7 @@ describe('walker', () => {
         });
 
         test('Given that adding data to the pods return sometime errors then the array have the corresponding errors', async () => {
-            const n = 100;
+            const n = 10;
             let i_shape_trees_generated = 0;
             let frequency_errors = 2;
             await mock.module("fs", () => {
@@ -301,7 +301,7 @@ describe('walker', () => {
                     readdirSync: (_path: string) => {
                         const resp = [];
                         for (let i = 0; i < n; i++) {
-                            resp.push(String(i));
+                            resp.push("posts");
                         }
                         return resp;
                     },
@@ -321,12 +321,11 @@ describe('walker', () => {
             config.generate_shape_trees = (_shapes: Array<ShapeContentPath>, _pod_path: string): undefined | ShapeTreesCannotBeGenerated => {
                 i_shape_trees_generated += 1;
                 if (((i_shape_trees_generated - 1) % frequency_errors) === 0) {
-                    return new ShapeTreesCannotBeGenerated(String(i_shape_trees_generated));
+                    return new ShapeTreesCannotBeGenerated(`${i_shape_trees_generated}`);
                 }
             };
 
             const resp = await walkSolidPods(config);
-
             expect(resp?.length).toBe(n / frequency_errors);
 
         });

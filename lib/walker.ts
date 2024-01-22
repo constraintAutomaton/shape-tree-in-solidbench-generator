@@ -15,8 +15,8 @@ export async function walkSolidPods(config: Config): Promise<Array<Array<Error>>
                 const resp = addShapeDataInPod(
                     {
                         pod_path: join(config.pod_folder, pod_path),
-                        generate_shape: getShapeFromPath,
-                        generate_shape_trees: generateShapeTrees
+                        generate_shape: config.generate_shape,
+                        generate_shape_trees: config.generate_shape_trees
                     }
                 );
 
