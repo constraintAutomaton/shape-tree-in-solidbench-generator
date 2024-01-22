@@ -1,4 +1,4 @@
-import { join } from "path";
+import { join, basename } from "path";
 import { readdirSync, copyFileSync, lstatSync, appendFileSync } from "fs";
 import { ShapeContentPath, Config, ShapeTreesCannotBeGenerated, ShapeDontExistError } from './util';
 
@@ -70,7 +70,7 @@ export function addShapeDataInPod(
             } else {
                 shapes_generated.push({ shape: shape_path, content: content_path });
                 file_generation_promises.push(new Promise(() => {
-                    copyFileSync(shape_path, pod_path);
+                    copyFileSync(shape_path, join(pod_path, basename(shape_path)));
                 }));
             }
         }
