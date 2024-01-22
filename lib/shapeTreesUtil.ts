@@ -1,8 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { Writer } from "n3";
-import { Term } from "@rdfjs/types";
 import { join, parse } from "path";
-import { readdirSync, copyFileSync, lstatSync, appendFileSync } from "fs";
+import { lstatSync, appendFileSync } from "fs";
 import { DataFactory } from 'rdf-data-factory';
 import type * as RDF from 'rdf-js';
 import { ShapeContentPath, RDF_TYPE_IRI, SHAPE_TREE_PREFIX_IRI, SOLID_IRI, SHAPE_TREE_FILE_NAME } from './util';
@@ -10,19 +9,16 @@ import { ShapeTreesCannotBeGenerated } from "./util";
 
 const DF = new DataFactory<RDF.BaseQuad>();
 
-export function generateShapeTrees(shape_content: Array<ShapeContentPath>, pod_path: string): ShapeTreesCannotBeGenerated | undefined {
-    let success: ShapeTreesCannotBeGenerated | undefined = undefined;
+export function generateShapeTrees(shape_content: Array<ShapeContentPath>, pod_path: string): undefined {
     const writer = new Writer();
     for (const { shape, content } of shape_content) {
-        const quads = generateTreeAShapeTree(shape, content, writer);
+        generateTreeAShapeTree(shape, content, writer);
     }
-    writer.end((error, result) => {
-        if (error !== undefined) {
-            appendFileSync(join(pod_path, SHAPE_TREE_FILE_NAME), result);
-        }
-        success = new ShapeTreesCannotBeGenerated(error.message);
+    writer.end((_error, result) => {
+        appendFileSync(join(pod_path, SHAPE_TREE_FILE_NAME), result);
+
     });
-    return success
+
 }
 
 function generateTreeAShapeTree(shape_path: string, content_path: string, writer: Writer) {

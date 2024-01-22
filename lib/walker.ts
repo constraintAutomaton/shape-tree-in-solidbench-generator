@@ -1,7 +1,5 @@
-import { join, parse } from "path";
+import { join } from "path";
 import { readdirSync, copyFileSync, lstatSync, appendFileSync } from "fs";
-import { getShapeFromPath } from './shapeUtil';
-import { generateShapeTrees } from './shapeTreesUtil'
 import { ShapeContentPath, Config, ShapeTreesCannotBeGenerated, ShapeDontExistError } from './util';
 
 

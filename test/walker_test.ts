@@ -1,7 +1,8 @@
-import { beforeEach, describe, expect, mock, spyOn, test, } from "bun:test";
+import { afterEach, beforeEach, describe, expect, mock, spyOn, test, } from "bun:test";
 import { addShapeDataInPod, walkSolidPods } from "../lib/walker";
-import { getShapeFromPath, SHAPE_MAP } from '../lib/shapeUtil';
-import { Config, ShapeContentPath, ShapeTreesCannotBeGenerated, ShapeDontExistError } from "../lib/util";
+import { SHAPE_MAP } from '../lib/shapeUtil';
+import { ShapeContentPath, ShapeTreesCannotBeGenerated, ShapeDontExistError } from "../lib/util";
+import {jest} from 'bun:test';
 
 describe('walker', () => {
     describe('addShapeDataInPod', () => {
@@ -18,7 +19,11 @@ describe('walker', () => {
                 },
                 copyFileSync(path_1: string, path_2: string) { return null },
             };
-        })
+        });
+
+        afterEach(()=>{
+            jest.restoreAllMocks();
+        });
 
 
         test("given a pod with multiple content with registered shapes should generate the shape", async () => {
