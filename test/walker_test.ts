@@ -2,14 +2,14 @@ import { afterEach, beforeEach, describe, expect, mock, spyOn, test, } from "bun
 import { addShapeDataInPod, walkSolidPods } from "../lib/walker";
 import { SHAPE_MAP } from '../lib/shapeUtil';
 import { ShapeContentPath, ShapeTreesCannotBeGenerated, ShapeDontExistError } from "../lib/util";
-import {jest} from 'bun:test';
+import { jest } from 'bun:test';
 
 describe('walker', () => {
     describe('addShapeDataInPod', () => {
         const A_POD_PATH = "foo";
         let spy_injestor: any;
 
-        beforeEach(() => {
+        beforeEach(async () => {
             spy_injestor = {
                 spyGenerateShape(path: string): string | ShapeDontExistError {
                     return path;
@@ -19,9 +19,20 @@ describe('walker', () => {
                 },
                 copyFileSync(path_1: string, path_2: string) { return null },
             };
+
+            await mock.module("fs", () => {
+                return {
+                    statSync: (_path: string) => {
+                        return {
+                            isDirectory: () => true
+                        };
+                    }
+                }
+            }
+            );
         });
 
-        afterEach(()=>{
+        afterEach(() => {
             jest.restoreAllMocks();
         });
 
@@ -30,7 +41,7 @@ describe('walker', () => {
             const spy_copy_file_sync = spyOn(spy_injestor, 'copyFileSync');
             await mock.module("fs", () => {
                 return {
-                    readdirSync: (path: string) => {
+                    readdirSync: (_path: string) => {
                         const resp = [];
                         for (const shape_name of SHAPE_MAP.keys()) {
                             resp.push(shape_name);
@@ -43,13 +54,50 @@ describe('walker', () => {
             const spy_generate_shape = spyOn(spy_injestor, "spyGenerateShape");
             const spy_generate_shape_tree = spyOn(spy_injestor, 'spyGenerateShapeTree');
 
-
             addShapeDataInPod({
                 pod_path: A_POD_PATH,
                 generate_shape: spy_generate_shape,
                 generate_shape_trees: spy_generate_shape_tree,
             });
 
+            expect(spy_copy_file_sync).toHaveBeenCalledTimes(SHAPE_MAP.size);
+            expect(spy_generate_shape_tree).toHaveBeenCalled();
+            expect(spy_generate_shape).toHaveBeenCalledTimes(SHAPE_MAP.size);
+        });
+
+        test("given a pod with multiple content with registered shapes should generate the shape when the path is a file", async () => {
+            const spy_copy_file_sync = spyOn(spy_injestor, 'copyFileSync');
+            await mock.module("fs", () => {
+                return {
+                    readdirSync: (_path: string) => {
+                        const resp = [];
+                        for (const shape_name of SHAPE_MAP.keys()) {
+                            resp.push(shape_name);
+                        }
+                        return resp;
+                    },
+                    copyFileSync: spy_copy_file_sync
+                }
+            });
+
+            await mock.module("fs", () => {
+                return {
+                    statSync: (_path: string) => {
+                        return {
+                            isDirectory: () => false
+                        };
+                    }
+                }
+            }
+            );
+            const spy_generate_shape = spyOn(spy_injestor, "spyGenerateShape");
+            const spy_generate_shape_tree = spyOn(spy_injestor, 'spyGenerateShapeTree');
+
+            addShapeDataInPod({
+                pod_path: A_POD_PATH,
+                generate_shape: spy_generate_shape,
+                generate_shape_trees: spy_generate_shape_tree,
+            });
 
             expect(spy_copy_file_sync).toHaveBeenCalledTimes(SHAPE_MAP.size);
             expect(spy_generate_shape_tree).toHaveBeenCalled();

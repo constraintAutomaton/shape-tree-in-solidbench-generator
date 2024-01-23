@@ -1,5 +1,4 @@
 import { parse, join } from "path";
-import { lstatSync } from "fs";
 import { ShapeDontExistError } from "./util";
 
 
