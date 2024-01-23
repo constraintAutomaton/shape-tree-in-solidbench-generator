@@ -3,6 +3,9 @@ export const SHAPE_TREE_PREFIX_IRI = "http://www.w3.org/ns/shapetrees#";
 export const SOLID_IRI = "http://www.w3.org/ns/solid/terms#";
 export const SHAPE_TREE_FILE_NAME = "shapetree.ttl";
 
+/**
+ * The path of the shape in a pod and the path of the content related to the shape it can be a file or a directory
+ */
 export interface ShapeContentPath {
     shape: string,
     content: string
@@ -14,14 +17,12 @@ export interface Config {
     generate_shape_trees: (shapes: Array<ShapeContentPath>, pod_path: string) => undefined | ShapeTreesCannotBeGenerated
 }
 
-
 export class ShapeTreesCannotBeGenerated extends Error {
     constructor(message: string) {
         super(message);
         this.name = "ShapeTreesCannotBeGenerated";
     }
 }
-
 
 export class ShapeDontExistError extends Error {
     constructor(message: string) {

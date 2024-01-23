@@ -5,22 +5,30 @@ import { lstatSync, appendFileSync } from "fs";
 import { DataFactory } from 'rdf-data-factory';
 import type * as RDF from 'rdf-js';
 import { ShapeContentPath, RDF_TYPE_IRI, SHAPE_TREE_PREFIX_IRI, SOLID_IRI, SHAPE_TREE_FILE_NAME } from './util';
-import { ShapeTreesCannotBeGenerated } from "./util";
 
 const DF = new DataFactory<RDF.BaseQuad>();
 
-export function generateShapeTrees(shape_content: Array<ShapeContentPath>, pod_path: string): undefined {
+/**
+ * generate the shape tree file in the pod named by the variable"SHAPE_TREE_FILE_NAME"
+ * @param {Array<ShapeContentPath>} shape_content - path of the shapes and the shape target
+ * @param {string} pod_path - path of the pod
+ */
+export function generateShapeTreesFile(shape_content: Array<ShapeContentPath>, pod_path: string) {
     const writer = new Writer();
     for (const { shape, content } of shape_content) {
         generateTreeAShapeTree(shape, content, writer);
     }
     writer.end((_error, result) => {
         appendFileSync(join(pod_path, SHAPE_TREE_FILE_NAME), result);
-
     });
-
 }
 
+/**
+ * Generate the triples for a shape tree entry (an entry being a type of information like the post, profile and others)
+ * @param {string} shape_path - The path of the shape
+ * @param {string} content_path - The path of the targeted content, can be a file or a directory
+ * @param {Writer} writer - A writer accumulating the shape tree entries
+ */
 function generateTreeAShapeTree(shape_path: string, content_path: string, writer: Writer) {
     const label_tree = `${parse(content_path).name}_${uuidv4()}`
     writer.addQuad(

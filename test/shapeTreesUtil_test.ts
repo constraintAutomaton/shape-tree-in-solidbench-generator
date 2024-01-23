@@ -1,5 +1,5 @@
 import { describe, expect, test, mock, afterEach, spyOn, beforeEach } from "bun:test";
-import { generateShapeTrees } from "../lib/shapeTreesUtil";
+import { generateShapeTreesFile } from "../lib/shapeTreesUtil";
 import { jest } from 'bun:test';
 import type { ShapeContentPath } from '../lib/util';
 import type { Writer } from "n3";
@@ -28,7 +28,7 @@ describe('generateShapeTrees', () => {
         const shape_content: Array<ShapeContentPath> = [];
         const pod_path = "foo";
 
-        const resp = generateShapeTrees(shape_content, pod_path);
+        const resp = generateShapeTreesFile(shape_content, pod_path);
 
         expect(resp).toBeUndefined();
         expect(spy_append_file_sync).toHaveBeenCalledTimes(1);
@@ -51,7 +51,7 @@ describe('generateShapeTrees', () => {
         ];
         const pod_path = "foo";
 
-        const resp = generateShapeTrees(shape_content, pod_path);
+        const resp = generateShapeTreesFile(shape_content, pod_path);
 
         await mock.module("../lib/shapeTreesUtil", () => {
             return {

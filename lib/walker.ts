@@ -2,11 +2,16 @@ import { join, basename, dirname } from "path";
 import { readdirSync, copyFileSync, statSync } from "fs";
 import { ShapeContentPath, Config, ShapeTreesCannotBeGenerated, ShapeDontExistError } from './util';
 
-
+/**
+ * Walk every pod of a directory
+ * @param {Config} config - The parameters for the generation of the shape and shape tree
+ * @returns {Promise<Array<Array<Error>> | undefined>} The errors while the generation or undefined if there was no error
+ */
 export async function walkSolidPods(config: Config): Promise<Array<Array<Error>> | undefined> {
     const pods_files = readdirSync(config.pod_folder);
     const errors: Array<Array<Error>> = [];
     const explore_pods_promises = [];
+
     for (const pod_path of pods_files) {
         explore_pods_promises.push(
             new Promise((resolve, reject) => {
@@ -38,11 +43,15 @@ export async function walkSolidPods(config: Config): Promise<Array<Array<Error>>
     return errors;
 }
 
+/**
+ * Add the shape and shape tree inside the pods 
+ * @returns {undefined | Array<Error>} The errors or undefined if the was no error
+ */
 export function addShapeDataInPod(
     {
         pod_path,
         generate_shape,
-        generate_shape_trees: generate_shape_trees
+        generate_shape_trees
     }
         : {
             pod_path: string,
