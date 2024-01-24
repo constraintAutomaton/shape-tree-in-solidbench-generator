@@ -14,7 +14,7 @@ import * as STG from 'shape-tree-in-solid-bench';
 
 const config: STG.Config = {
     pods_folder: "{path of the pods}", // example "out-fragments/http/localhost_3000/pods"
-    shape_folders: "{folder of the shapes}", // to be defined by the user
+    shape_folders: "{folder of the shapes}", // example at `./shapes` in this repository
     generate_shape: STG.getShapeFromPath,
     generate_shape_trees: STG.generateShapeTreesFile,
 };
