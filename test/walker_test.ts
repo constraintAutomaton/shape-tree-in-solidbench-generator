@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, mock, spyOn, test, } from "bun:test";
 import { addShapeDataInPod, walkSolidPods } from "../lib/walker";
 import { SHAPE_MAP } from '../lib/shapeUtil';
-import { ShapeContentPath, ShapeTreesCannotBeGenerated, ShapeDontExistError } from "../lib/util";
+import { ShapeContentPath, ShapeDontExistError } from "../lib/util";
 import { jest } from 'bun:test';
 
 describe('walker', () => {
@@ -180,42 +180,6 @@ describe('walker', () => {
 
         });
 
-        test("should return an error if the shape tree generator return an error", async () => {
-            const spy_copy_file_sync = spyOn(spy_injestor, 'copyFileSync');
-            await mock.module("fs", () => {
-                return {
-                    readdirSync: (path: string) => {
-                        const resp = [];
-                        for (const shape_name of SHAPE_MAP.keys()) {
-                            resp.push(shape_name);
-                        }
-                        return resp;
-                    },
-                    copyFileSync: spy_copy_file_sync
-                }
-            });
-
-            spy_injestor.spyGenerateShapeTree = () => {
-                return new ShapeTreesCannotBeGenerated("")
-            }
-            const spy_generate_shape = spyOn(spy_injestor, "spyGenerateShape");
-            const spy_generate_shape_tree = spyOn(spy_injestor, 'spyGenerateShapeTree');
-
-
-            const resp = addShapeDataInPod({
-                pod_path: A_POD_PATH,
-                generate_shape: spy_generate_shape,
-                generate_shape_trees: spy_generate_shape_tree,
-            });
-
-
-            expect(spy_copy_file_sync).toHaveBeenCalledTimes(SHAPE_MAP.size);
-            expect(spy_generate_shape_tree).toHaveBeenCalled();
-            expect(spy_generate_shape).toHaveBeenCalledTimes(SHAPE_MAP.size);
-            expect(resp?.length).toBe(1);
-
-        });
-
         test("given a pod with multiple content with registered and unregisted shapes and with no shape trees generator should generate the shape and an array of error", async () => {
             const spy_copy_file_sync = spyOn(spy_injestor, 'copyFileSync');
             const unregistred_contents = ["unregistred_a", "unregistred_b", "unregistred_c"];
@@ -267,8 +231,7 @@ describe('walker', () => {
                 spyGenerateShape(path: string): string | ShapeDontExistError {
                     return path;
                 },
-                spyGenerateShapeTree(_shapes: Array<ShapeContentPath>, pod_path: string): undefined | ShapeTreesCannotBeGenerated {
-                    return undefined
+                spyGenerateShapeTree(_shapes: Array<ShapeContentPath>, _pod_path: string): void {
                 },
                 copyFileSync(path_1: string, path_2: string) { return null },
             };
@@ -347,8 +310,8 @@ describe('walker', () => {
 
         test('Given that adding data to the pods return sometime errors then the array have the corresponding errors', async () => {
             const n = 10;
-            let i_shape_trees_generated = 0;
-            let frequency_errors = 2;
+            let i_shape_generator = 0;
+            let frequency_errors = 50;
             await mock.module("fs", () => {
                 return {
                     readdirSync: (_path: string) => {
@@ -371,15 +334,16 @@ describe('walker', () => {
                 }
             });
 
-            config.generate_shape_trees = (_shapes: Array<ShapeContentPath>, _pod_path: string): undefined | ShapeTreesCannotBeGenerated => {
-                i_shape_trees_generated += 1;
-                if (((i_shape_trees_generated - 1) % frequency_errors) === 0) {
-                    return new ShapeTreesCannotBeGenerated(`${i_shape_trees_generated}`);
+            config.generate_shape = (_path: string): string | ShapeDontExistError => {
+                i_shape_generator += 1;
+                if (((i_shape_generator - 1) % frequency_errors) === 0) {
+                    return new ShapeDontExistError("");
                 }
+                return "";
             };
 
             const resp = await walkSolidPods(config);
-            expect(resp?.length).toBe(n / frequency_errors);
+            expect(resp?.length).toBe((n*n) / frequency_errors);
 
         });
     });

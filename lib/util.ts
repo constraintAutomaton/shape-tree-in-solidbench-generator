@@ -14,14 +14,7 @@ export interface ShapeContentPath {
 export interface Config {
     pod_folder: string,
     generate_shape: (path: string) => string | ShapeDontExistError,
-    generate_shape_trees: (shapes: Array<ShapeContentPath>, pod_path: string) => undefined | ShapeTreesCannotBeGenerated
-}
-
-export class ShapeTreesCannotBeGenerated extends Error {
-    constructor(message: string) {
-        super(message);
-        this.name = "ShapeTreesCannotBeGenerated";
-    }
+    generate_shape_trees: (shapes: Array<ShapeContentPath>, pod_path: string) => void
 }
 
 export class ShapeDontExistError extends Error {

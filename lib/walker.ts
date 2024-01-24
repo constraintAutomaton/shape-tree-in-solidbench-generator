@@ -1,6 +1,6 @@
 import { join, basename, dirname } from "path";
 import { readdirSync, copyFileSync, statSync } from "fs";
-import { ShapeContentPath, Config, ShapeTreesCannotBeGenerated, ShapeDontExistError } from './util';
+import { ShapeContentPath, Config, ShapeDontExistError } from './util';
 
 /**
  * Walk every pod of a directory
@@ -56,7 +56,7 @@ export function addShapeDataInPod(
         : {
             pod_path: string,
             generate_shape?: (path: string) => string | ShapeDontExistError,
-            generate_shape_trees?: (shapes: Array<ShapeContentPath>, pod_path: string) => undefined | ShapeTreesCannotBeGenerated
+            generate_shape_trees?: (shapes: Array<ShapeContentPath>, pod_path: string) => void
         })
 
     : undefined | Array<Error> {
@@ -95,14 +95,10 @@ export function addShapeDataInPod(
     Promise.all(file_generation_promises);
 
     if (generate_shape_trees !== undefined) {
-        const shape_trees_error = generate_shape_trees(shapes_generated, pod_path);
-        if (shape_trees_error !== undefined) {
-            error_array.push(shape_trees_error)
-            return error_array
-        } else if (error_array.length !== 0) {
-            return error_array
-        }
-    } else if (error_array.length !== 0) {
+        generate_shape_trees(shapes_generated, pod_path);
+    }
+
+    if (error_array.length !== 0) {
         return error_array
     }
 
