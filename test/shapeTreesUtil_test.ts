@@ -37,21 +37,19 @@ describe('generateShapeTrees', () => {
     test("Given an array of content and a pod path should generate the shapetree document and return no error", async () => {
         const shape_content: Array<ShapeContentPath> = [
             {
-                shape: "foo",
-                content: "bar"
+                shape: "http/localhost_30340/pods/00000000000000000065/d/shape",
+                content: "http/localhost_30340/pods/00000000000000000065/d"
             },
             {
-                shape: "foo1",
-                content: "bar1"
+                shape: "http/localhost_30340/pods/00000000000000000065/abc/shape",
+                content: "http/localhost_30340/pods/00000000000000000065/abc"
             },
             {
-                shape: "foo2",
-                content: "bar2"
+                shape: "http/localhost_30340/pods/00000000000000000065/d.shape",
+                content: "http/localhost_30340/pods/00000000000000000065/post"
             }
         ];
-        const pod_path = "foo";
-
-        const resp = generateShapeTreesFile(shape_content, pod_path);
+        const pod_path = "http/localhost_30340/pods/00000000000000000065/";
 
         await mock.module("../lib/shapeTreesUtil", () => {
             return {
@@ -61,8 +59,51 @@ describe('generateShapeTrees', () => {
             }
         });
 
+        const resp = generateShapeTreesFile(shape_content, pod_path);
+
+
+
         expect(resp).toBeUndefined();
         expect(spy_append_file_sync).toHaveBeenCalledTimes(1);
     });
+
+    test("Given an array of content with non unix path content should throw", async () => {
+        const shape_content: Array<ShapeContentPath> = [
+            {
+                shape: "foo",
+                content: "http"
+            }
+        ];
+        const pod_path = "http/localhost_30340/pods/00000000000000000065/";
+
+        await mock.module("../lib/shapeTreesUtil", () => {
+            return {
+                generateTreeAShapeTree: (_shape_path: string, _content_path: string, _writer: Writer) => {
+                    return null
+                },
+            }
+        });
+        expect(()=>generateShapeTreesFile(shape_content, pod_path)).toThrow();
+    });
+
+    test("Given an array of content with non unix path shape should throw", async () => {
+        const shape_content: Array<ShapeContentPath> = [
+            {
+                shape: "foo",
+                content: "http/localhost_30340/pods/00000000000000000065/post"
+            }
+        ];
+        const pod_path = "http/localhost_30340/pods/00000000000000000065/";
+
+        await mock.module("../lib/shapeTreesUtil", () => {
+            return {
+                generateTreeAShapeTree: (_shape_path: string, _content_path: string, _writer: Writer) => {
+                    return null
+                },
+            }
+        });
+        expect(()=>generateShapeTreesFile(shape_content, pod_path)).toThrow();
+    });
+
 
 })

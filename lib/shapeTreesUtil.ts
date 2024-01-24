@@ -16,7 +16,7 @@ const DF = new DataFactory<RDF.BaseQuad>();
 export function generateShapeTreesFile(shape_content: Array<ShapeContentPath>, pod_path: string) {
     const writer = new Writer();
     for (const { shape, content } of shape_content) {
-        generateTreeAShapeTree(shape, content, writer);
+        generateTreeAShapeTree(pod_url_path_from_file_path(shape), content, writer);
     }
     writer.end((_error, result) => {
         appendFileSync(join(pod_path, SHAPE_TREE_FILE_NAME), result);
@@ -52,6 +52,16 @@ function generateTreeAShapeTree(shape_path: string, content_path: string, writer
     writer.addQuad(
         DF.namedNode(label_tree),
         DF.namedNode(`${SOLID_IRI}${lstatSync(content_path).isDirectory() ? "instanceContainer" : "instance"}`),
-        DF.namedNode(content_path)
+        DF.namedNode(pod_url_path_from_file_path(content_path))
     );
+}
+
+function pod_url_path_from_file_path(path: string) {
+    const re = /(https?)\/(.*)\/(pods)\/(.*)/;
+    const found = path.match(re);
+    if (found === null) {
+        throw new Error("should be an unix path");
+    }
+    const [http, name_space, pods, rest_url] = [found[1], found[2], found[3], found[4]];
+    return `${http}://${name_space.replace("_",":")}/${pods}/${rest_url}`;
 }

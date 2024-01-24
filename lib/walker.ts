@@ -8,7 +8,7 @@ import { ShapeContentPath, Config, ShapeDontExistError } from './util';
  * @returns {Promise<Array<Array<Error>> | undefined>} The errors while the generation or undefined if there was no error
  */
 export async function walkSolidPods(config: Config): Promise<Array<Array<Error>> | undefined> {
-    const pods_files = readdirSync(config.pod_folder);
+    const pods_files = readdirSync(config.pods_folder);
     const errors: Array<Array<Error>> = [];
     const explore_pods_promises = [];
 
@@ -17,7 +17,7 @@ export async function walkSolidPods(config: Config): Promise<Array<Array<Error>>
             new Promise((resolve, reject) => {
                 const resp = addShapeDataInPod(
                     {
-                        pod_path: join(config.pod_folder, pod_path),
+                        pod_path: join(config.pods_folder, pod_path),
                         generate_shape: config.generate_shape,
                         generate_shape_trees: config.generate_shape_trees
                     }
@@ -77,7 +77,7 @@ export function addShapeDataInPod(
             if (shape_path instanceof ShapeDontExistError) {
                 error_array.push(shape_path);
             } else {
-                shapes_generated.push({ shape: shape_path, content: content_path });
+
                 file_generation_promises.push(new Promise(() => {
                     let resulting_shape_path: string;
                     if (statSync(content_path).isDirectory()) {
@@ -87,13 +87,13 @@ export function addShapeDataInPod(
                     }
                     copyFileSync(shape_path, resulting_shape_path);
 
+                    shapes_generated.push({ shape: resulting_shape_path, content: content_path });
                 }));
             }
         }
     }
 
     Promise.all(file_generation_promises);
-
     if (generate_shape_trees !== undefined) {
         generate_shape_trees(shapes_generated, pod_path);
     }

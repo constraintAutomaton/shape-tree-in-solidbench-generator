@@ -12,7 +12,7 @@ export interface ShapeContentPath {
 }
 
 export interface Config {
-    pod_folder: string,
+    pods_folder: string,
     generate_shape: (path: string) => string | ShapeDontExistError,
     generate_shape_trees: (shapes: Array<ShapeContentPath>, pod_path: string) => void
 }
