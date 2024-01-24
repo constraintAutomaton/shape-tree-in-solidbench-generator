@@ -60,7 +60,7 @@ function pod_url_path_from_file_path(path: string) {
     const re = /(https?)\/(.*)\/(pods)\/(.*)/;
     const found = path.match(re);
     if (found === null) {
-        throw new Error("should be an unix path");
+        throw new Error("should be an UNIX path to the pods of SolidBench");
     }
     const [http, name_space, pods, rest_url] = [found[1], found[2], found[3], found[4]];
     return `${http}://${name_space.replace("_",":")}/${pods}/${rest_url}`;

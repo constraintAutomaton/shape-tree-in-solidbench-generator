@@ -5,7 +5,7 @@ import type { ShapeContentPath } from '../lib/util';
 import type { Writer } from "n3";
 
 
-describe('generateShapeTrees', () => {
+describe('generateShapeTreesFile', () => {
     const spy_injestor = {
         appendFileSync(_path: string, _data: string) { return null }
     };
@@ -24,7 +24,7 @@ describe('generateShapeTrees', () => {
         });
     });
 
-    test("Given an empty array of content and a pod path should generate the shapetree document and return no error", async () => {
+    test("Given an empty array of content and shape, and a pod path should generate the shapetree document and return no errors", async () => {
         const shape_content: Array<ShapeContentPath> = [];
         const pod_path = "foo";
 
@@ -34,7 +34,7 @@ describe('generateShapeTrees', () => {
         expect(spy_append_file_sync).toHaveBeenCalledTimes(1);
     });
 
-    test("Given an array of content and a pod path should generate the shapetree document and return no error", async () => {
+    test("Given an array of content and shape, a pod path should generate the shapetree document and return no errors", async () => {
         const shape_content: Array<ShapeContentPath> = [
             {
                 shape: "http/localhost_30340/pods/00000000000000000065/d/shape",
@@ -67,7 +67,7 @@ describe('generateShapeTrees', () => {
         expect(spy_append_file_sync).toHaveBeenCalledTimes(1);
     });
 
-    test("Given an array of content with non unix path content should throw", async () => {
+    test("Given an array of content with non-Unix paths to SolidBench for the content should throw an error", async () => {
         const shape_content: Array<ShapeContentPath> = [
             {
                 shape: "foo",
@@ -86,7 +86,7 @@ describe('generateShapeTrees', () => {
         expect(()=>generateShapeTreesFile(shape_content, pod_path)).toThrow();
     });
 
-    test("Given an array of content with non unix path shape should throw", async () => {
+    test("Given an array of content and shape with non-Unix paths to SolidBench for the shapes should throw an error", async () => {
         const shape_content: Array<ShapeContentPath> = [
             {
                 shape: "foo",

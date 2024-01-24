@@ -37,7 +37,7 @@ describe('walker', () => {
         });
 
 
-        test("given a pod with multiple content with registered shapes should generate the shape", async () => {
+        test("given a pod with multiple contents associated with shapes should generate the shape when the path is directory", async () => {
             const spy_copy_file_sync = spyOn(spy_injestor, 'copyFileSync');
             await mock.module("fs", () => {
                 return {
@@ -65,7 +65,7 @@ describe('walker', () => {
             expect(spy_generate_shape).toHaveBeenCalledTimes(SHAPE_MAP.size);
         });
 
-        test("given a pod with multiple content with registered shapes should generate the shape when the path is a file", async () => {
+        test("given a pod with multiple contents associated with shapes should generate the shape when the path is a file", async () => {
             const spy_copy_file_sync = spyOn(spy_injestor, 'copyFileSync');
             await mock.module("fs", () => {
                 return {
@@ -104,7 +104,7 @@ describe('walker', () => {
             expect(spy_generate_shape).toHaveBeenCalledTimes(SHAPE_MAP.size);
         });
 
-        test("given a pod with multiple content with registered shapes and content with non registered shapes should generate the shape and an array of error", async () => {
+        test("given a pod with multiple contents where some are associated with shapes and others are not should generate the shape and an array of error", async () => {
             const spy_copy_file_sync = spyOn(spy_injestor, 'copyFileSync');
             const unregistred_contents = ["unregistred_a", "unregistred_b", "unregistred_c"];
             await mock.module("fs", () => {
@@ -180,7 +180,7 @@ describe('walker', () => {
 
         });
 
-        test("given a pod with multiple content with registered and unregisted shapes and with no shape trees generator should generate the shape and an array of error", async () => {
+        test("given no shape tree generator function and a shape generator function should return the valid shapes", async () => {
             const spy_copy_file_sync = spyOn(spy_injestor, 'copyFileSync');
             const unregistred_contents = ["unregistred_a", "unregistred_b", "unregistred_c"];
             await mock.module("fs", () => {
@@ -244,7 +244,7 @@ describe('walker', () => {
         })
 
 
-        test('Given that there is no error in adding data inside pods then it should return an empty array', async () => {
+        test('given that the shape generator return no error then undefined should be returned', async () => {
             await mock.module("fs", () => {
                 return {
                     readdirSync: (_path: string) => {
@@ -272,7 +272,7 @@ describe('walker', () => {
             expect(resp).toBeUndefined();
         });
 
-        test('Given that adding data to the pods return only errors then the array should be full of errors', async () => {
+        test('given that the shape generator always returned errors then an array of error should be returned', async () => {
             const n = 100;
 
             await mock.module("fs", () => {
@@ -308,7 +308,7 @@ describe('walker', () => {
             expect(resp?.length).toBe(n);
         });
 
-        test('Given that adding data to the pods return sometime errors then the array have the corresponding errors', async () => {
+        test('given that the shape generator return some errors then an array of error should be returned', async () => {
             const n = 10;
             let i_shape_generator = 0;
             let frequency_errors = 50;

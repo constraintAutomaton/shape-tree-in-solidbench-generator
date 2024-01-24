@@ -59,7 +59,7 @@ export function addShapeDataInPod(
             pod_path: string,
             generate_shape?: (path: string, shape_folder: string | undefined) => string | ShapeDontExistError,
             generate_shape_trees?: (shapes: Array<ShapeContentPath>, pod_path: string) => void,
-            shape_folder: string | undefined
+            shape_folder?: string
         })
 
     : undefined | Array<Error> {
