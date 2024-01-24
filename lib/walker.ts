@@ -19,7 +19,8 @@ export async function walkSolidPods(config: Config): Promise<Array<Array<Error>>
                     {
                         pod_path: join(config.pods_folder, pod_path),
                         generate_shape: config.generate_shape,
-                        generate_shape_trees: config.generate_shape_trees
+                        generate_shape_trees: config.generate_shape_trees,
+                        shape_folder: config.shape_folders
                     }
                 );
 
@@ -51,12 +52,14 @@ export function addShapeDataInPod(
     {
         pod_path,
         generate_shape,
-        generate_shape_trees
+        generate_shape_trees,
+        shape_folder,
     }
         : {
             pod_path: string,
-            generate_shape?: (path: string) => string | ShapeDontExistError,
-            generate_shape_trees?: (shapes: Array<ShapeContentPath>, pod_path: string) => void
+            generate_shape?: (path: string, shape_folder: string | undefined) => string | ShapeDontExistError,
+            generate_shape_trees?: (shapes: Array<ShapeContentPath>, pod_path: string) => void,
+            shape_folder: string | undefined
         })
 
     : undefined | Array<Error> {
@@ -73,7 +76,7 @@ export function addShapeDataInPod(
     for (const pod_content_path of pod_contents) {
         if (generate_shape !== undefined) {
             const content_path = join(pod_path, pod_content_path);
-            const shape_path = generate_shape(content_path);
+            const shape_path = generate_shape(content_path, shape_folder);
             if (shape_path instanceof ShapeDontExistError) {
                 error_array.push(shape_path);
             } else {
