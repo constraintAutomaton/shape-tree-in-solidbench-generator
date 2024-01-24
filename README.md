@@ -1,15 +1,22 @@
 # shape-tree-in-solid-bench
 
-To install dependencies:
+A library to add RDF shape and [shape trees](https://shapetrees.org/) into [SolidBench](https://github.com/SolidBench/SolidBench.js)
 
+## Installation
 ```bash
 bun install
 ```
+## Usage
 
-To run:
+```ts
+import * as STG from 'shape-tree-in-solid-bench';
 
-```bash
-bun run index.ts
+
+const config: STG.Config = {
+    pods_folder: "{path of the pods}", // example "out-fragments/http/localhost_3000/pods"
+    shape_folders: "{folder of the shapes}", // to be defined by the user
+    generate_shape: STG.getShapeFromPath,
+    generate_shape_trees: STG.generateShapeTreesFile,
+};
+STG.walkSolidPods(config);
 ```
-
-This project was created using `bun init` in bun v1.0.11. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
