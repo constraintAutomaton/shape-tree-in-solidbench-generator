@@ -2,6 +2,7 @@
   "name": "shape-tree-in-solid-bench",
   "module": "index.ts",
   "type": "module",
+  "version": "0.0.0",
   "devDependencies": {
     "@types/uuid": "^9.0.7",
     "bun-types": "latest",
