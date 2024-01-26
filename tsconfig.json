@@ -5,17 +5,25 @@
       "es2021",
       "dom"
     ],
-    "target": "es6",
     "moduleDetection": "force",
     "noEmit": false,
     "composite": true,
-    "strict": true,
     "downlevelIteration": true,
     "skipLibCheck": true,
     "jsx": "react-jsx",
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
     "allowJs": true,
+    "target": "es6",
+    "noImplicitAny": true,
+    "removeComments": false,
+    "preserveConstEnums": true,
+    "sourceMap": true,
+    "inlineSources": true,
+    "declaration": true,
+    "importHelpers": false,
+    "strict": true,
+    "esModuleInterop": true
   },
   "exclude": ["node_modules", "test/*"]
 }
