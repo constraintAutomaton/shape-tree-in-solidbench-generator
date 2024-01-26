@@ -176,3 +176,8 @@ dist
 
 out-fragments
 out-fragments copy
+
+# Typescript
+**/*.js
+**/*.d.ts
+tsconfig.tsbuildinfo

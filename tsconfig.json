@@ -19,6 +19,6 @@
     "types": [
       "bun-types" // add Bun global
     ],
-    "outDir": "build"
-  }
+  },
+  "exclude": ["node_modules", "test/*"]
 }

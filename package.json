@@ -24,6 +24,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "build:declaration": "tsc --emitDeclarationOnly --project tsconfig.types.json"
+    "postinstall":"bun run build",
+    "clean":"tsc --build --clean"
   }
 }
