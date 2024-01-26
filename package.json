@@ -22,7 +22,6 @@
     "rdf-js": "^4.0.2",
     "uuid": "^9.0.1"
   },
-  "prepare": "silly hack from https://github.com/yarnpkg/yarn/issues/2822#issuecomment-847360267 to get make the files field work when installing using git",
   "scripts": {
     "build": "tsc",
     "build:declaration": "tsc --emitDeclarationOnly --project tsconfig.types.json"
