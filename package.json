@@ -8,6 +8,10 @@
     "bun-types": "latest",
     "jest": "^29.7.0"
   },
+  "files": [
+    "./build/*"
+  ],
+  "main": "./index",
   "peerDependencies": {
     "typescript": "^5.0.0"
   },
@@ -18,5 +22,8 @@
     "rdf-data-factory": "^1.1.2",
     "rdf-js": "^4.0.2",
     "uuid": "^9.0.1"
+  },
+  "scripts": {
+    "build-dist":"bun build index.ts --target node --outdir ./build"
   }
 }
