@@ -1,9 +1,11 @@
 {
   "compilerOptions": {
-    "lib": ["ESNext"],
-    "module": "esnext",
-    "target": "esnext",
-    "moduleResolution": "bundler",
+    "module": "commonjs",
+    "lib": [
+      "es2021",
+      "dom"
+    ],
+    "target": "es6",
     "moduleDetection": "force",
     "noEmit": false,
     "composite": true,
