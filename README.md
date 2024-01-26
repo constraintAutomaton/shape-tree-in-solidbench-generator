@@ -20,3 +20,6 @@ const config: STG.Config = {
 };
 STG.walkSolidPods(config);
 ```
+
+## TO DO 
+Make a better build file
