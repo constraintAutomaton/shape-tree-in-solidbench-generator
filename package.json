@@ -9,7 +9,7 @@
     "jest": "^29.7.0"
   },
   "files": [
-    "./build/*"
+    "./build/"
   ],
   "main": "./index",
   "peerDependencies": {
