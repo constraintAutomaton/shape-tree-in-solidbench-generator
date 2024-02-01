@@ -17,11 +17,12 @@ export const SHAPE_MAP: Map<string, string> = new Map([
  * @param {string} path - The path of a pod data
  * @returns {string | ShapeDontExistError} The template path file or an error if the pod data is not supported
  */
-export function getShapeFromPath(path: string, shape_folder: string | undefined = SHAPE_FOLDER_DEFAULT): string | ShapeDontExistError {
+export function generateShapeFromPath(path: string, shape_folder: string | undefined = SHAPE_FOLDER_DEFAULT): string | ShapeDontExistError {
     const path_serialized = parse(path);
     const shape_path = SHAPE_MAP.get(path_serialized.name);
     if (shape_path === undefined) {
         return new ShapeDontExistError(`The shape derived from the file ${path_serialized.name} don't exist `);
     }
-    return join(shape_folder === undefined ? SHAPE_FOLDER_DEFAULT : shape_folder, shape_path);
+    const folder = shape_folder === undefined ? SHAPE_FOLDER_DEFAULT : shape_folder;
+    return join(folder, shape_path);
 }

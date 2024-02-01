@@ -1,27 +1,20 @@
-import { describe, expect, test, mock, afterEach, spyOn, beforeEach } from "bun:test";
 import { generateShapeTreesFile } from "../lib/shapeTreesUtil";
-import { jest } from 'bun:test';
 import type { ShapeContentPath } from '../lib/util';
 import type { Writer } from "n3";
+import { appendFileSync, lstatSync } from 'fs';
 
+jest.mock('fs');
+(<jest.Mock>appendFileSync).mockImplementation((_path: string, _data: string) => null);
+jest.mock('../lib/shapeTreesUtil', () => ({
+    ...<any>jest.requireActual('../lib/shapeTreesUtil'),
+    generateTreeAShapeTree(_shape_path: string, _content_path: string, _writer: Writer) {
+        return null;
+    }
+}));
 
 describe('generateShapeTreesFile', () => {
-    const spy_injestor = {
-        appendFileSync(_path: string, _data: string) { return null }
-    };
-    let spy_append_file_sync: any = null;
-
-    afterEach(() => {
-        jest.restoreAllMocks();
-    });
-
-    beforeEach(async () => {
-        spy_append_file_sync = spyOn(spy_injestor, 'appendFileSync');
-        await mock.module("fs", () => {
-            return {
-                appendFileSync: spy_append_file_sync,
-            }
-        });
+    afterEach(()=>{
+        (<jest.Mock> appendFileSync).mockReset();
     });
 
     test("Given an empty array of content and shape, and a pod path should generate the shapetree document and return no errors", async () => {
@@ -31,7 +24,7 @@ describe('generateShapeTreesFile', () => {
         const resp = generateShapeTreesFile(shape_content, pod_path);
 
         expect(resp).toBeUndefined();
-        expect(spy_append_file_sync).toHaveBeenCalledTimes(1);
+        expect(appendFileSync).toHaveBeenCalledTimes(1);
     });
 
     test("Given an array of content and shape, a pod path should generate the shapetree document and return no errors", async () => {
@@ -50,21 +43,14 @@ describe('generateShapeTreesFile', () => {
             }
         ];
         const pod_path = "http/localhost_30340/pods/00000000000000000065/";
-
-        await mock.module("../lib/shapeTreesUtil", () => {
-            return {
-                generateTreeAShapeTree: (_shape_path: string, _content_path: string, _writer: Writer) => {
-                    return null
-                },
-            }
+        let prevVal = true;
+        (<jest.Mock>lstatSync).mockReturnValue({
+            isDirectory: () => { prevVal = !prevVal; return prevVal; }
         });
-
         const resp = generateShapeTreesFile(shape_content, pod_path);
 
-
-
         expect(resp).toBeUndefined();
-        expect(spy_append_file_sync).toHaveBeenCalledTimes(1);
+        expect(appendFileSync).toHaveBeenCalledTimes(1);
     });
 
     test("Given an array of content with non-Unix paths to SolidBench for the content should throw an error", async () => {
@@ -76,14 +62,7 @@ describe('generateShapeTreesFile', () => {
         ];
         const pod_path = "http/localhost_30340/pods/00000000000000000065/";
 
-        await mock.module("../lib/shapeTreesUtil", () => {
-            return {
-                generateTreeAShapeTree: (_shape_path: string, _content_path: string, _writer: Writer) => {
-                    return null
-                },
-            }
-        });
-        expect(()=>generateShapeTreesFile(shape_content, pod_path)).toThrow();
+        expect(() => generateShapeTreesFile(shape_content, pod_path)).toThrow();
     });
 
     test("Given an array of content and shape with non-Unix paths to SolidBench for the shapes should throw an error", async () => {
@@ -95,14 +74,7 @@ describe('generateShapeTreesFile', () => {
         ];
         const pod_path = "http/localhost_30340/pods/00000000000000000065/";
 
-        await mock.module("../lib/shapeTreesUtil", () => {
-            return {
-                generateTreeAShapeTree: (_shape_path: string, _content_path: string, _writer: Writer) => {
-                    return null
-                },
-            }
-        });
-        expect(()=>generateShapeTreesFile(shape_content, pod_path)).toThrow();
+        expect(() => generateShapeTreesFile(shape_content, pod_path)).toThrow();
     });
 
 

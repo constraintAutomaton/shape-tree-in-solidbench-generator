@@ -1,271 +1,119 @@
-import { afterEach, beforeEach, describe, expect, mock, spyOn, test, } from "bun:test";
 import { addShapeDataInPod, walkSolidPods } from "../lib/walker";
-import { SHAPE_MAP } from '../lib/shapeUtil';
+import { SHAPE_MAP, generateShapeFromPath } from '../lib/shapeUtil';
+import { generateShapeTreesFile } from "../lib/shapeTreesUtil";
 import { ShapeContentPath, ShapeDontExistError } from "../lib/util";
-import { jest } from 'bun:test';
+import { copyFileSync, readdirSync, lstatSync } from 'fs';
+
+let filesReturnedByreaddirSync: Array<string> = [];
+let isDirectoryResponse: boolean = true;
+
+jest.mock('fs');
+
+jest.mock('../lib/shapeUtil');
+
+jest.mock('../lib/shapeTreesUtil');
+
+const dataType = ["a", "b", "c"];
 
 describe('walker', () => {
+
+    beforeEach(() => {
+        (<jest.Mock>readdirSync).mockReturnValue(filesReturnedByreaddirSync);
+        (<jest.Mock>copyFileSync).mockReturnValue(null);
+        (<jest.Mock>generateShapeFromPath).mockReturnValue('foo');
+        (<jest.Mock>lstatSync).mockReturnValue({
+            isDirectory: () => isDirectoryResponse
+        });
+        (<jest.Mock>generateShapeTreesFile).mockReturnValueOnce(undefined);
+    });
+
+    afterEach(() => {
+        (<jest.Mock>readdirSync).mockClear();
+        (<jest.Mock>copyFileSync).mockClear();
+        (<jest.Mock>generateShapeFromPath).mockClear();
+        (<jest.Mock>lstatSync).mockClear();
+        (<jest.Mock>generateShapeTreesFile).mockClear();
+
+    });
+
     describe('addShapeDataInPod', () => {
         const A_POD_PATH = "foo";
-        let spy_injestor: any;
-
-        beforeEach(async () => {
-            spy_injestor = {
-                spyGenerateShape(path: string): string | ShapeDontExistError {
-                    return path;
-                },
-                spyGenerateShapeTree(shapes: Array<ShapeContentPath>, pod_path: string): undefined | Error {
-                    return undefined
-                },
-                copyFileSync(path_1: string, path_2: string) { return null },
-            };
-
-            await mock.module("fs", () => {
-                return {
-                    statSync: (_path: string) => {
-                        return {
-                            isDirectory: () => true
-                        };
-                    }
-                }
-            }
-            );
-        });
-
-        afterEach(() => {
-            jest.restoreAllMocks();
-        });
-
 
         test("given a pod with multiple contents associated with shapes should generate the shape when the path is directory", async () => {
-            const spy_copy_file_sync = spyOn(spy_injestor, 'copyFileSync');
-            await mock.module("fs", () => {
-                return {
-                    readdirSync: (_path: string) => {
-                        const resp = [];
-                        for (const shape_name of SHAPE_MAP.keys()) {
-                            resp.push(shape_name);
-                        }
-                        return resp;
-                    },
-                    copyFileSync: spy_copy_file_sync
-                }
-            });
-            const spy_generate_shape = spyOn(spy_injestor, "spyGenerateShape");
-            const spy_generate_shape_tree = spyOn(spy_injestor, 'spyGenerateShapeTree');
-
+            filesReturnedByreaddirSync = Array.from(dataType);
+            (<jest.Mock>readdirSync).mockReturnValueOnce(filesReturnedByreaddirSync);
             addShapeDataInPod({
                 pod_path: A_POD_PATH,
-                generate_shape: spy_generate_shape,
-                generate_shape_trees: spy_generate_shape_tree,
             });
 
-            expect(spy_copy_file_sync).toHaveBeenCalledTimes(SHAPE_MAP.size);
-            expect(spy_generate_shape_tree).toHaveBeenCalled();
-            expect(spy_generate_shape).toHaveBeenCalledTimes(SHAPE_MAP.size);
+            expect(copyFileSync).toHaveBeenCalledTimes(dataType.length);
+            expect(generateShapeFromPath).toHaveBeenCalledTimes(dataType.length);
+            expect(generateShapeTreesFile).toHaveBeenCalled();
+
         });
 
         test("given a pod with multiple contents associated with shapes should generate the shape when the path is a file", async () => {
-            const spy_copy_file_sync = spyOn(spy_injestor, 'copyFileSync');
-            await mock.module("fs", () => {
-                return {
-                    readdirSync: (_path: string) => {
-                        const resp = [];
-                        for (const shape_name of SHAPE_MAP.keys()) {
-                            resp.push(shape_name);
-                        }
-                        return resp;
-                    },
-                    copyFileSync: spy_copy_file_sync
-                }
+            filesReturnedByreaddirSync = Array.from(dataType);
+            (<jest.Mock>readdirSync).mockReturnValueOnce(filesReturnedByreaddirSync);
+            isDirectoryResponse = false;
+            (<jest.Mock>lstatSync).mockReturnValue({
+                isDirectory: () => isDirectoryResponse
             });
-
-            await mock.module("fs", () => {
-                return {
-                    statSync: (_path: string) => {
-                        return {
-                            isDirectory: () => false
-                        };
-                    }
-                }
-            }
-            );
-            const spy_generate_shape = spyOn(spy_injestor, "spyGenerateShape");
-            const spy_generate_shape_tree = spyOn(spy_injestor, 'spyGenerateShapeTree');
 
             addShapeDataInPod({
                 pod_path: A_POD_PATH,
-                generate_shape: spy_generate_shape,
-                generate_shape_trees: spy_generate_shape_tree,
             });
 
-            expect(spy_copy_file_sync).toHaveBeenCalledTimes(SHAPE_MAP.size);
-            expect(spy_generate_shape_tree).toHaveBeenCalled();
-            expect(spy_generate_shape).toHaveBeenCalledTimes(SHAPE_MAP.size);
+            expect(copyFileSync).toHaveBeenCalledTimes(dataType.length);
+            expect(generateShapeTreesFile).toHaveBeenCalled();
+            expect(generateShapeFromPath).toHaveBeenCalledTimes(dataType.length);
         });
 
         test("given a pod with multiple contents where some are associated with shapes and others are not should generate the shape and an array of error", async () => {
-            const spy_copy_file_sync = spyOn(spy_injestor, 'copyFileSync');
             const unregistred_contents = ["unregistred_a", "unregistred_b", "unregistred_c"];
-            await mock.module("fs", () => {
-                return {
-                    readdirSync: (path: string) => {
-                        const resp = [];
-                        for (const shape_name of SHAPE_MAP.keys()) {
-                            resp.push(shape_name);
-                        }
-                        return resp.concat(unregistred_contents);
-                    },
-                    copyFileSync: spy_copy_file_sync,
-                }
-            });
+            filesReturnedByreaddirSync = Array.from(dataType).concat(unregistred_contents);
+            (<jest.Mock>readdirSync).mockReturnValueOnce(filesReturnedByreaddirSync);
 
-            spy_injestor.spyGenerateShape = (path: string): string | ShapeDontExistError => {
+            (<jest.Mock>generateShapeFromPath).mockImplementation((path: string): string | ShapeDontExistError => {
                 for (const content of unregistred_contents) {
                     if (path.includes(content)) {
                         return new ShapeDontExistError("");
                     }
                 }
                 return path;
-            }
-
-            const spy_generate_shape = spyOn(spy_injestor, "spyGenerateShape");
-            const spy_generate_shape_tree = spyOn(spy_injestor, 'spyGenerateShapeTree');
+            });
 
             const resp = addShapeDataInPod({
                 pod_path: A_POD_PATH,
-                generate_shape: spy_generate_shape,
-                generate_shape_trees: spy_generate_shape_tree,
             });
 
             expect(resp?.length).toBe(unregistred_contents.length);
 
-            expect(spy_copy_file_sync).toHaveBeenCalledTimes(SHAPE_MAP.size);
-            expect(spy_generate_shape_tree).toHaveBeenCalledTimes(1);
-            expect(spy_generate_shape).toHaveBeenCalledTimes(SHAPE_MAP.size + unregistred_contents.length);
+            expect(copyFileSync).toHaveBeenCalledTimes(dataType.length);
+            expect(generateShapeTreesFile).toHaveBeenCalledTimes(1);
+            expect(generateShapeFromPath).toHaveBeenCalledTimes(dataType.length + unregistred_contents.length);
 
         });
 
-        test("given no shape generator function should do nothing and return undefined", async () => {
-            const spy_copy_file_sync = spyOn(spy_injestor, 'copyFileSync');
-            const unregistred_contents = ["unregistred_a", "unregistred_b", "unregistred_c"];
-            await mock.module("fs", () => {
-                return {
-                    readdirSync: (path: string) => {
-                        const resp = [];
-                        for (const shape_name of SHAPE_MAP.keys()) {
-                            resp.push(shape_name);
-                        }
-                        return resp.concat(unregistred_contents);
-                    },
-                    copyFileSync: spy_copy_file_sync,
-                }
-            });
-
-            spy_injestor.spyGenerateShape = (path: string): string | ShapeDontExistError => {
-                for (const content of unregistred_contents) {
-                    if (path.includes(content)) {
-                        return new ShapeDontExistError("");
-                    }
-                }
-                return path;
-            }
-
-
-            const resp = addShapeDataInPod({
-                pod_path: A_POD_PATH,
-            });
-
-            expect(resp).toBeUndefined()
-
-        });
-
-        test("given no shape tree generator function and a shape generator function should return the valid shapes", async () => {
-            const spy_copy_file_sync = spyOn(spy_injestor, 'copyFileSync');
-            const unregistred_contents = ["unregistred_a", "unregistred_b", "unregistred_c"];
-            await mock.module("fs", () => {
-                return {
-                    readdirSync: (path: string) => {
-                        const resp = [];
-                        for (const shape_name of SHAPE_MAP.keys()) {
-                            resp.push(shape_name);
-                        }
-                        return resp.concat(unregistred_contents);
-                    },
-                    copyFileSync: spy_copy_file_sync,
-                }
-            });
-
-            spy_injestor.spyGenerateShape = (path: string): string | ShapeDontExistError => {
-                for (const content of unregistred_contents) {
-                    if (path.includes(content)) {
-                        return new ShapeDontExistError("");
-                    }
-                }
-                return path;
-            }
-
-            const spy_generate_shape = spyOn(spy_injestor, "spyGenerateShape");
-
-            const resp = addShapeDataInPod({
-                pod_path: A_POD_PATH,
-                generate_shape: spy_generate_shape,
-            });
-
-            expect(resp?.length).toBe(unregistred_contents.length);
-
-            expect(spy_copy_file_sync).toHaveBeenCalledTimes(SHAPE_MAP.size);
-            expect(spy_generate_shape).toHaveBeenCalledTimes(SHAPE_MAP.size + unregistred_contents.length);
-
-        });
     });
 
     describe('walkSolidPods', () => {
 
         let config: any = null;
 
-        let spy_injestor: any;
-
         beforeEach(() => {
-            spy_injestor = {
-                spyGenerateShape(path: string): string | ShapeDontExistError {
-                    return path;
-                },
-                spyGenerateShapeTree(_shapes: Array<ShapeContentPath>, _pod_path: string): void {
-                },
-                copyFileSync(path_1: string, path_2: string) { return null },
-            };
-
             config = {
-                pod_folder: "",
-                generate_shape: spy_injestor.spyGenerateShape,
-                generate_shape_trees: spy_injestor.spyGenerateShapeTree
+                pod_folder: "pod",
             };
         })
 
 
         test('given that the shape generator return no error then undefined should be returned', async () => {
-            await mock.module("fs", () => {
-                return {
-                    readdirSync: (_path: string) => {
-                        const resp = [];
-                        for (const shape_name of SHAPE_MAP.keys()) {
-                            resp.push(shape_name);
-                        }
-                        return resp;
-                    },
-                    copyFileSync: (_path_1: string, _path_2: string) => {
-                        return null;
-                    },
-                    lstatSync: (_path: string) => {
-                        return {
-                            isDirectory: () => {
-                                return true;
-                            }
-                        }
-                    }
-                }
+            filesReturnedByreaddirSync = Array.from(dataType);
+            (<jest.Mock>readdirSync).mockImplementation(()=>{
+                return filesReturnedByreaddirSync;
             });
+            (<jest.Mock>generateShapeTreesFile).mockReturnValueOnce(undefined);
 
             const resp = await walkSolidPods(config);
 
@@ -274,34 +122,16 @@ describe('walker', () => {
 
         test('given that the shape generator always returned errors then an array of error should be returned', async () => {
             const n = 100;
-
-            await mock.module("fs", () => {
-                return {
-                    readdirSync: (_path: string) => {
-                        const resp = [];
-                        for (let i = 0; i < n; i++) {
-                            resp.push(String(i));
-                        }
-                        return resp;
-                    },
-                    copyFileSync: (_path_1: string, _path_2: string) => {
-                        return null;
-                    },
-                    lstatSync: (_path: string) => {
-                        return {
-                            isDirectory: () => {
-                                return true;
-                            }
-                        }
-                    }
-                }
-            });
+            filesReturnedByreaddirSync = [];
+            for (let i = 0; i < n; i++) {
+                filesReturnedByreaddirSync.push(String(i));
+            }
+            isDirectoryResponse = true;
 
 
-            config.generate_shape = (_path: string): string | ShapeDontExistError => {
+            (<jest.Mock>generateShapeFromPath).mockImplementation((path: string): string | ShapeDontExistError => {
                 return new ShapeDontExistError("");
-            };
-
+            });
 
             const resp = await walkSolidPods(config);
 
@@ -312,38 +142,22 @@ describe('walker', () => {
             const n = 10;
             let i_shape_generator = 0;
             let frequency_errors = 50;
-            await mock.module("fs", () => {
-                return {
-                    readdirSync: (_path: string) => {
-                        const resp = [];
-                        for (let i = 0; i < n; i++) {
-                            resp.push("posts");
-                        }
-                        return resp;
-                    },
-                    copyFileSync: (_path_1: string, _path_2: string) => {
-                        return null;
-                    },
-                    lstatSync: (_path: string) => {
-                        return {
-                            isDirectory: () => {
-                                return true;
-                            }
-                        }
-                    }
-                }
-            });
+            filesReturnedByreaddirSync = [];
+            for (let i = 0; i < n; i++) {
+                filesReturnedByreaddirSync.push(String(i));
+            }
+            isDirectoryResponse = true;
 
-            config.generate_shape = (_path: string): string | ShapeDontExistError => {
+            (<jest.Mock>generateShapeFromPath).mockImplementation((path: string): string | ShapeDontExistError => {
                 i_shape_generator += 1;
                 if (((i_shape_generator - 1) % frequency_errors) === 0) {
                     return new ShapeDontExistError("");
                 }
                 return "";
-            };
+            });
 
             const resp = await walkSolidPods(config);
-            expect(resp?.length).toBe((n*n) / frequency_errors);
+            expect(resp?.length).toBe((n * n) / frequency_errors);
 
         });
     });

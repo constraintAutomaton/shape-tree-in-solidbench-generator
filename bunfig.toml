@@ -1,4 +1,0 @@
-telemetry = false
-
-[test]
-coverage = true # always enable coverage
