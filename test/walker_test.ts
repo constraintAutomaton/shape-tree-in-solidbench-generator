@@ -1,13 +1,14 @@
 import { addShapeDataInPod, walkSolidPods } from "../lib/walker";
-import { SHAPE_MAP, generateShapeFromPath } from '../lib/shapeUtil';
+import { generateShapeFromPath } from '../lib/shapeUtil';
 import { generateShapeTreesFile } from "../lib/shapeTreesUtil";
-import { ShapeContentPath, ShapeDontExistError } from "../lib/util";
+import { Config, ShapeDontExistError } from "../lib/util";
 import { copyFileSync, readdirSync, lstatSync } from 'fs';
 
 let filesReturnedByreaddirSync: Array<string> = [];
 let isDirectoryResponse: boolean = true;
 
 jest.mock('fs');
+
 
 jest.mock('../lib/shapeUtil');
 
@@ -99,21 +100,22 @@ describe('walker', () => {
 
     describe('walkSolidPods', () => {
 
-        let config: any = null;
+        let config: Config = {
+            pods_folder: "pod",
+        };
 
         beforeEach(() => {
             config = {
-                pod_folder: "pod",
+                pods_folder: "pod",
             };
         })
 
 
         test('given that the shape generator return no error then undefined should be returned', async () => {
             filesReturnedByreaddirSync = Array.from(dataType);
-            (<jest.Mock>readdirSync).mockImplementation(()=>{
+            (<jest.Mock>readdirSync).mockImplementation(() => {
                 return filesReturnedByreaddirSync;
             });
-            (<jest.Mock>generateShapeTreesFile).mockReturnValueOnce(undefined);
 
             const resp = await walkSolidPods(config);
 
@@ -126,7 +128,9 @@ describe('walker', () => {
             for (let i = 0; i < n; i++) {
                 filesReturnedByreaddirSync.push(String(i));
             }
-            isDirectoryResponse = true;
+            (<jest.Mock>readdirSync).mockImplementation(() => {
+                return filesReturnedByreaddirSync;
+            });
 
 
             (<jest.Mock>generateShapeFromPath).mockImplementation((path: string): string | ShapeDontExistError => {
@@ -146,7 +150,12 @@ describe('walker', () => {
             for (let i = 0; i < n; i++) {
                 filesReturnedByreaddirSync.push(String(i));
             }
+            (<jest.Mock>readdirSync).mockReturnValue(filesReturnedByreaddirSync);
+
             isDirectoryResponse = true;
+            (<jest.Mock>lstatSync).mockReturnValue({
+                isDirectory: () => isDirectoryResponse
+            });
 
             (<jest.Mock>generateShapeFromPath).mockImplementation((path: string): string | ShapeDontExistError => {
                 i_shape_generator += 1;
