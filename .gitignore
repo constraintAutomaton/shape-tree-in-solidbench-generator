@@ -182,3 +182,4 @@ out-fragments copy
 **/*.d.ts
 **/*.js.map
 tsconfig.tsbuildinfo
+test.mjs
