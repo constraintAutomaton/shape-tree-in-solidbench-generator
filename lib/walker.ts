@@ -2,7 +2,7 @@ import { join, basename, dirname } from "path";
 import { readdirSync, copyFileSync, lstatSync } from "fs";
 import { ShapeContentPath, Config, ShapeDontExistError } from './util';
 import { generateShapeTreesFile } from "./shapeTreesUtil";
-import { generateShapeFromPath } from "./shapeUtil";
+import { generateShapeFromPath, generateShapeMap } from "./shapeUtil";
 
 /**
  * Walk every pod of a directory
@@ -13,6 +13,7 @@ export async function walkSolidPods(config: Config): Promise<Array<Array<Error>>
     const pods_files = readdirSync(config.pods_folder);
     const errors: Array<Array<Error>> = [];
     const explore_pods_promises = [];
+    generateShapeMap(config.shape_folders);
 
     for (const pod_path of pods_files) {
         explore_pods_promises.push(

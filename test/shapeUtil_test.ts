@@ -1,8 +1,9 @@
-import { generateShapeFromPath } from '../lib/shapeUtil';
+import { generateShapeFromPath, getShapeMap, generateShapeMap } from '../lib/shapeUtil';
 import { ShapeDontExistError } from '../lib/util';
 import { parse } from "path";
+import { readFileSync } from 'fs';
 
-
+jest.mock('fs');
 describe('generateShapeFromPath', () => {
     it('should return an error given a path without a base name not related to data in a solid pod of SolidBench', () => {
         const path = "./foo/bar/foo/bar";
@@ -32,3 +33,17 @@ describe('generateShapeFromPath', () => {
         }
     });
 })
+
+describe('generateShapeMap', () => {
+    it('should generate a shape given a valid config file', () => {
+        (<jest.Mock>readFileSync).mockReturnValueOnce(`{
+            "shapes": {
+                "comment": "comment.shexc"
+            }
+        }`);
+        const expectedShapeMap = new Map([["comment", "comment.shexc"]]);
+        generateShapeMap();
+
+        expect(getShapeMap()).toStrictEqual(expectedShapeMap);
+    });
+});

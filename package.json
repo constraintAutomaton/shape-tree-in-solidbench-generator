@@ -22,7 +22,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "test": "jest",
+    "test": " yarn clean && jest",
     "postinstall": "bun run build",
     "clean": "tsc --build --clean"
   }

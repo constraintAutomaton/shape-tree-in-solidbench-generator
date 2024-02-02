@@ -1,5 +1,5 @@
 import { addShapeDataInPod, walkSolidPods } from "../lib/walker";
-import { generateShapeFromPath } from '../lib/shapeUtil';
+import { generateShapeFromPath, generateShapeMap } from '../lib/shapeUtil';
 import { generateShapeTreesFile } from "../lib/shapeTreesUtil";
 import { Config, ShapeDontExistError } from "../lib/util";
 import { copyFileSync, readdirSync, lstatSync } from 'fs';
@@ -26,6 +26,8 @@ describe('walker', () => {
             isDirectory: () => isDirectoryResponse
         });
         (<jest.Mock>generateShapeTreesFile).mockReturnValueOnce(undefined);
+        (<jest.Mock>generateShapeMap).mockReturnValueOnce(undefined);
+
     });
 
     afterEach(() => {
@@ -34,6 +36,7 @@ describe('walker', () => {
         (<jest.Mock>generateShapeFromPath).mockClear();
         (<jest.Mock>lstatSync).mockClear();
         (<jest.Mock>generateShapeTreesFile).mockClear();
+        (<jest.Mock>generateShapeMap).mockClear();
 
     });
 

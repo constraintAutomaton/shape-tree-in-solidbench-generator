@@ -1,15 +1,14 @@
 import { parse, join } from "path";
 import { ShapeDontExistError } from "./util";
-
+import { readFileSync } from 'fs';
 const SHAPE_FOLDER_DEFAULT = "./shapes";
-const SHAPE_EXTENSION = "shexc";
 
 /**
  * A map of the type of information in the pod with the path of the shape
  * @constant {Map<string, string>}
  */
-export const SHAPE_MAP: Map<string, string> = new Map([
-    ['posts', `posts.${SHAPE_EXTENSION}`],
+let SHAPE_MAP: Map<string, string> = new Map([
+    ['posts', `posts.shexc`],
 ]);
 
 /**
@@ -23,5 +22,18 @@ export function generateShapeFromPath(path: string, shapes_folder: string = SHAP
     if (shape_file_path === undefined) {
         return new ShapeDontExistError(`The shape derived from the file ${path_serialized.name} don't exist `);
     }
-    return join(shapes_folder, shape_file_path );
+    return join(shapes_folder, shape_file_path);
+}
+
+export function generateShapeMap(path: string = SHAPE_FOLDER_DEFAULT) {
+    const config = JSON.parse(readFileSync(path).toString());
+    const shapes = config["shapes"];
+    SHAPE_MAP.clear();
+    for (const [dataType, shape] of Object.entries(shapes)) {
+        SHAPE_MAP.set(dataType, <string>shape);
+    }
+}
+
+export function getShapeMap(): Map<string, string>{
+    return new Map(SHAPE_MAP)
 }
