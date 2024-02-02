@@ -180,6 +180,8 @@ out-fragments copy
 # Typescript
 **/*.js
 **/*.d.ts
+**/*.d.ts.map
 **/*.js.map
 tsconfig.tsbuildinfo
 test.mjs
+build
