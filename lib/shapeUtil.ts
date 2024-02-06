@@ -26,7 +26,7 @@ export function generateShapeFromPath(path: string, shapes_folder: string = SHAP
 }
 
 export function generateShapeMap(path: string = SHAPE_FOLDER_DEFAULT) {
-    const config = JSON.parse(readFileSync(path).toString());
+    const config = JSON.parse(readFileSync(join(path, 'config.json')).toString());
     const shapes = config["shapes"];
     SHAPE_MAP.clear();
     for (const [dataType, shape] of Object.entries(shapes)) {

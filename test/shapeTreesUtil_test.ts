@@ -1,20 +1,13 @@
-import { generateShapeTreesFile } from "../lib/shapeTreesUtil";
+import { generateShapeTreesFile, addShapeTreeLocationToFile } from "../lib/shapeTreesUtil";
 import type { ShapeContentPath } from '../lib/util';
-import type { Writer } from "n3";
-import { appendFileSync, lstatSync } from 'fs';
+import { appendFileSync, lstatSync, readdirSync} from 'fs';
 
 jest.mock('fs');
 (<jest.Mock>appendFileSync).mockImplementation((_path: string, _data: string) => null);
-jest.mock('../lib/shapeTreesUtil', () => ({
-    ...<any>jest.requireActual('../lib/shapeTreesUtil'),
-    generateTreeAShapeTree(_shape_path: string, _content_path: string, _writer: Writer) {
-        return null;
-    }
-}));
 
 describe('generateShapeTreesFile', () => {
-    afterEach(()=>{
-        (<jest.Mock> appendFileSync).mockReset();
+    afterEach(() => {
+        (<jest.Mock>appendFileSync).mockReset();
     });
 
     test("Given an empty array of content and shape, and a pod path should generate the shapetree document and return no errors", async () => {
@@ -76,6 +69,30 @@ describe('generateShapeTreesFile', () => {
 
         expect(() => generateShapeTreesFile(shape_content, pod_path)).toThrow();
     });
-
-
 })
+
+describe('addShapeTreeLocationToFile', () => {
+    afterEach(() => {
+        (<jest.Mock>appendFileSync).mockReset();
+    });
+    
+    test('should add the shape tree locator to a ressource file', () => {
+        (<jest.Mock>lstatSync).mockReturnValue({
+            isDirectory: () => { return false }
+        });
+        addShapeTreeLocationToFile("http/localhost_30340/pods/00000000000000000065/", "bar");
+
+        expect((<jest.Mock> appendFileSync)).toHaveBeenCalled();
+    });
+
+    test('should add the shape tree locator to a ressource file', () => {
+        (<jest.Mock>lstatSync).mockReturnValue({
+            isDirectory: () => { return true }
+        });
+
+        (<jest.Mock>readdirSync).mockReturnValue(["a", "b", "c"]);
+        addShapeTreeLocationToFile("http/localhost_30340/pods/00000000000000000065/", "bar");
+
+        expect((<jest.Mock> appendFileSync)).toHaveBeenCalledTimes(3);
+    });
+});

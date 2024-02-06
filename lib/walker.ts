@@ -1,7 +1,7 @@
 import { join, basename, dirname } from "path";
 import { readdirSync, copyFileSync, lstatSync } from "fs";
 import { ShapeContentPath, Config, ShapeDontExistError } from './util';
-import { generateShapeTreesFile } from "./shapeTreesUtil";
+import { generateShapeTreesFile, addShapeTreeLocationToFile } from "./shapeTreesUtil";
 import { generateShapeFromPath, generateShapeMap } from "./shapeUtil";
 
 /**
@@ -77,6 +77,7 @@ export function addShapeDataInPod(
         } else {
 
             file_generation_promises.push(new Promise(() => {
+                addShapeTreeLocationToFile(pod_path, pod_content_path);
                 let resulting_shape_path: string;
                 if (lstatSync(content_path).isDirectory()) {
                     resulting_shape_path = join(content_path, basename(shape_path));

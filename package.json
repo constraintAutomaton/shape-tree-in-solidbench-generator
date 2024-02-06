@@ -1,6 +1,6 @@
 {
   "name": "shape-trees-in-solidbench-generator",
-  "version": "0.0.0",
+  "version": "0.0.2",
   "devDependencies": {
     "@types/jest": "^29.5.11",
     "@types/uuid": "^9.0.7",
@@ -25,9 +25,8 @@
     "typescript": "^5.3.3"
   },
   "scripts": {
-    "build": "tsc",
-    "test": " yarn clean && jest",
-    "postinstall": "bun run build",
+    "build": " yarn clean && tsc",
+    "test": "jest",
     "clean": "tsc --build --clean",
     "prepublishOnly": "yarn build"
   }
