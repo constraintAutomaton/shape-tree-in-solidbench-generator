@@ -185,3 +185,4 @@ out-fragments copy
 tsconfig.tsbuildinfo
 test.mjs
 build
+!jest.config.js
