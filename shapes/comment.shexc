@@ -3,13 +3,13 @@ PREFIX ldbcvoc: <http://localhost:3000/www.ldbc.eu/ldbc_socialnet/1.0/vocabulary
 PREFIX schema: <http://www.w3.org/2000/01/rdf-schema#>
 
 <#Comment> {
-    ldbcvoc:id xsd:long {1}
-    ldbcvoc:creationDate xsd:dateTime {1}
-    ldbcvoc:locationIP xsd:string {1}
-    ldbcvoc:browserUsed xsd:string {1}
-    ldbcvoc:content xsd:string {1}
-    ldbcvoc:lenght xsd:int {1}
-    ldbcvoc:replyOf IRI {1} # Could be more precise
-    ldbcvoc:isLocatedIn IRI {1} # Could be more precise let's create a shape pod for this kind of thing
-    ldbcvoc:hasCreator IRI {1} # similar comment
+    ldbcvoc:id xsd:long {1} ;
+    ldbcvoc:creationDate xsd:dateTime {1} ;
+    ldbcvoc:locationIP xsd:string {1} ;
+    ldbcvoc:browserUsed xsd:string {1} ;
+    ldbcvoc:content xsd:string {1} ;
+    ldbcvoc:lenght xsd:int {1} ;
+    ldbcvoc:replyOf IRI {1} ;# Could be more precise
+    ldbcvoc:isLocatedIn IRI {1} ; # Could be more precise let's create a shape pod for this kind of thing
+    ldbcvoc:hasCreator IRI {1} ; # similar comment
 }
